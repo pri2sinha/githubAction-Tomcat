@@ -1,0 +1,21 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('checkout') {
+            steps {
+                echo 'download from Github'
+            }
+        }
+        stage('Build') {
+            steps {
+                echo 'Building job'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploying the job'
+            }
+        }
+    }
+}

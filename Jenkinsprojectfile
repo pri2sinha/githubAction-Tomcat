@@ -1,0 +1,69 @@
+pipeline {
+    agent any
+    parameters {
+        string(name: 'BRANCH_NAME', defaultValue: 'fe/dev', description: 'Specify the branch name to deploy')
+    }
+    stages {
+        stage("GIT checkout") {
+            steps {
+                script {
+                    // Checkout the specified branch
+                    def branchName = params.BRANCH_NAME
+                    checkout([$class: 'GitSCM', branches: [[name: branchName]], userRemoteConfigs: [[url: 'https://github.com/pri2sinha/boxfuse-sample-java-war-hello2.git']]])
+                }
+            }
+         }
+        stage("Testing") {
+            steps {
+                echo "Test Runs"
+            
+            }
+        }
+        stage("Build") {
+            steps {
+                sh "mvn clean package"
+                sh "mv target/hello-1.0.war target/Sample-app.v1.war"
+            }
+        }
+        stage("Deploy to Dev") {
+            when {
+                expression { params.BRANCH_NAME == 'fe/dev' }
+            }
+            steps {
+                deployToTomcat('3.108.62.250', 'tomcat', 'tomcat', 'http://3.108.62.250:8080/manager/text', '/Sample-app.v1', 'Dev')
+            }
+        }
+        stage("Deploy to QA") {
+            when {
+                expression { params.BRANCH_NAME == 'fe/qa' }
+            }
+            steps {
+                deployToTomcat('13.233.237.178', 'tomcat', 'tomcat', 'http://13.233.237.178:8080/manager/text', '/Sample-app.v1', 'QA')
+            }
+        }
+        stage("Deploy to UAT") {
+            when {
+                expression { params.BRANCH_NAME == 'master' }
+            }
+            steps {
+                input(message: "Do you want to proceed to UAT?", ok: "Proceed") // Approval step
+
+                // Deploy to UAT server after approval
+                deployToTomcat('13.201.63.218', 'tomcat', 'tomcat', 'http://13.201.63.218:8080/manager/text', '/Sample-app.v1', 'UAT')
+                
+                // Send Slack notification
+                slackSend(channel: 'devops-ai', message: "Deployment to PROD has been approved by manager.")
+            }
+        }
+    }
+}
+
+def deployToTomcat(tomcatIP, username, password, tomcatURL, contextPath, environment) {
+    def warFileName = 'target/Sample-app.v1.war'
+
+    // Deploy the WAR file using curl
+    sh """
+        curl -v -u ${username}:${password} --upload-file ${warFileName} ${tomcatURL}/deploy?path=${contextPath}&update=true
+    """
+    echo "Deployment to ${environment} server completed."
+}
