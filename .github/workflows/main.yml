@@ -1,31 +1,36 @@
-name: CI-CD Pipeline
+name: Build and Deploy to Tomcat
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main   # runs when you push to main branch
 
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
 
     steps:
-
+    # Step 1: Get code from GitHub
     - name: Checkout Code
       uses: actions/checkout@v3
 
+    # Step 2: Install Java
     - name: Setup Java
       uses: actions/setup-java@v3
       with:
         java-version: '17'
+        distribution: 'temurin'
 
-    - name: Build WAR
+    # Step 3: Build WAR file using Maven
+    - name: Build Project
       run: mvn clean package
 
+    # Step 4: Deploy WAR to Tomcat server
     - name: Deploy to Tomcat
-      uses: appleboy/scp-action@master
+      uses: appleboy/scp-action@v0.1.4
       with:
         host: ${{ secrets.SERVER_IP }}
-        username: ${{ secrets.SERVER_USER }}
+        username: ${{ secrets.USERNAME }}
         key: ${{ secrets.SSH_KEY }}
-        source: "target/myapp.war"
+        source: "target/*.war"
         target: "/opt/tomcat/webapps/"
