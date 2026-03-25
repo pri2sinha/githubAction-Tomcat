@@ -6,8 +6,10 @@
 <h1>Congratulations DEPLOYED TO TOMCAT!</h1>
 
 
-<!-- Jenkins Pipeline Image -->
-<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJRjFNhtptkv_1_lBy90auNQfbWNUk1hjQkQ&s"style="width:500px; margin:10px;">
+<!-- GitHub Actions Banner -->
+<img src="https://github.githubassets.com/images/modules/site/features/actions-hero.webp" 
+     alt="GitHub Actions" 
+     style="width:500px; margin:10px;">
 <!-- Tomcat Image -->
 <img src="https://cdn.shortpixel.ai/spai/q_lossy+ret_img+to_auto/linuxiac.com/wp-content/uploads/2021/07/apache-with-tomcat.png" alt="Tomcat Server" style="width:500px; margin:10px;">
 
