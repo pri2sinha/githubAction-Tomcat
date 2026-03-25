@@ -3,29 +3,38 @@ name: Build and Deploy to Tomcat
 on:
   push:
     branches:
-      - main   # runs when you push to main branch
+      - main   # runs when you push to main
 
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Get code from GitHub
+
+    # Step 1: Checkout code
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    # Step 2: Install Java
+    # Step 2: Setup Java
     - name: Setup Java
       uses: actions/setup-java@v3
       with:
-        java-version: '17'
         distribution: 'temurin'
+        java-version: '17'
 
-    # Step 3: Build WAR file using Maven
+    # Step 3: Install Maven
+    - name: Install Maven
+      run: sudo apt update && sudo apt install maven -y
+
+    # Step 4: Build WAR file
     - name: Build Project
       run: mvn clean package
 
-    # Step 4: Deploy WAR to Tomcat server
+    # Step 5: Check WAR file (for debugging)
+    - name: Verify WAR file
+      run: ls target
+
+    # Step 6: Deploy WAR to Tomcat server
     - name: Deploy to Tomcat
       uses: appleboy/scp-action@v0.1.4
       with:
@@ -33,4 +42,4 @@ jobs:
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.SSH_KEY }}
         source: "target/*.war"
-        target: "/opt/tomcat/webapps/"
+        target: "/home/ubuntu/apache-tomcat-10.1.53/webapps/"
